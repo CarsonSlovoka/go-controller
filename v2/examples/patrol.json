@@ -1,0 +1,50 @@
+{
+  "Title": "巡守",
+  "Desc": "鼠標在兩點之間來回移動，且凡達起、終點時都會點擊左鍵一次",
+  "Hooks": [
+    {
+      "Name": "Start",
+      "Func": "{{ (RunJob \"滑鼠來回並點擊\" .) | EventHook \"KeyDown\" \"s\" }}"
+    },
+    {
+      "Name": "ExitApp",
+      "Func": "{{  (ExitApp .) | EventHook \"KeyDown\" \"ctrl\" \"shift\" \"e\" }}"
+    }
+  ],
+  "Jobs": [
+    {
+      "Name": "初始化滑鼠位置",
+      "Desc": "移動到x:300, y:500的位置",
+      "Func": "{{Move 300 500 | Log | Log \"初始化滑鼠位置終了\" }}"
+    },
+    {
+      "Name": "滑鼠來回並點擊",
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": 2,
+        "MaxRunNote": "-1 means forever. Otherwise, it will be terminated when it reaches that number",
+        "Interval": 1000,
+        "IntervalNote": "milli second"
+      },
+      "Desc": "如果您希望工作中一次可以執行很多項目，可以使用Cmd來幫忙",
+      "Cmd": [
+        {
+          "Desc": "在滑鼠當前的位置點擊左鍵一次",
+          "Func": "{{Click | Log \"在「左」邊點擊了左鍵一下\"}}"
+        },
+        {
+          "Name": "Move from Left to Right",
+          "Desc": "承接之前的滑鼠位置x再向右400, y位置維持不動, 開始的移動初速度為1, 最高移動速度為30(模擬人的移動(開始慢之後變快))",
+          "Func": "{{MoveSmoothRelative 400 0 1 30}}"
+        },
+        {
+          "Func": "{{Click | Log \"在「右」邊點擊了左鍵一下\"}}"
+        },
+        {
+          "Name": "Move from Right to Left",
+          "Func": "{{MoveSmoothRelative -400 0 1 30}}"
+        }
+      ]
+    }
+  ]
+}
