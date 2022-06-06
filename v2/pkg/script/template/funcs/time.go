@@ -7,10 +7,10 @@ import (
 
 func Sleep(sec time.Duration) string {
 	time.Sleep(sec * time.Second)
-	return fmt.Sprintf("sleep: %d sec", sec)
+	return fmt.Sprintf("sleep: %d sec\n", sec)
 }
 
 func MsSleep(ms time.Duration) string {
 	time.Sleep(ms * time.Millisecond)
-	return fmt.Sprintf("sleep: %d ms", ms)
+	return fmt.Sprintf("sleep: %d ms\n", ms)
 }

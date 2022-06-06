@@ -1,0 +1,88 @@
+{
+  "Title": "Hello World",
+  "Desc": "This script contains 3 examples for your reference.",
+  "Hooks": [
+    {
+      "Name": "Start",
+      "Desc": "used in Example 1",
+      "Func": "{{ (RunJob \"demo\" .) | EventHook \"KeyDown\" \"ctrl\" \"shift\" \"1\" }}"
+    },
+    {
+      "Name": "Pause",
+      "Desc": "used in Example 1",
+      "Func": "{{ (PauseJob \"demo\" .) | EventHook \"KeyDown\" \"CTRL\" \"shift\" \"2\" }}"
+    },
+    {
+      "Name": "example2: pasteStr",
+      "Func": "{{ (RunJob \"demo-pasteStr\" .) | EventHook \"KeyDown\" \"CTRL\" \"shift\" \"3\" }}"
+    },
+    {
+      "Name": "example3: WriteAll",
+      "Func": "{{ (RunJob \"demo-WriteAll\" .) | EventHook \"KeyDown\" \"CTRL\" \"shift\" \"4\" }}"
+    }
+  ],
+  "Jobs": [
+    {
+      "Name": "demo",
+      "Desc": "Simulate the user typing with keyboard.",
+      "Async": true,
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": -1,
+        "Interval": -1
+      },
+      "Cmd": [
+        {
+          "Func": "{{TypeStr \"Hello World\" 200}}"
+        },
+        {
+          "Desc": "select all",
+          "Func": "{{KeyTap \"a\" \"control\"}}"
+        },
+        {
+          "Func": "{{Sleep 1}}"
+        },
+        {
+          "Desc": "copy",
+          "Func": "{{KeyTap \"c\" \"control\"}}"
+        },
+        {
+          "Desc": "move to the end of the content.",
+          "Func": "{{KeyTap \"end\"}}"
+        },
+        {
+          "Func": "{{MsSleep 1300}}"
+        },
+        {
+          "Func": "{{KeyTap \"enter\" }}"
+        },
+        {
+          "Desc": "paste",
+          "Func": "{{KeyTap \"v\" \"control\"}}"
+        }
+      ]
+    },
+    {
+      "Name": "demo-pasteStr",
+      "Async": true,
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": -1,
+        "Interval": -1
+      },
+      "Desc": "write the string to clipboard and tap `cmd + v`",
+      "Func": "{{ PasteStr \"您好 世界 Hello World!!!\uD83D\uDE80\" }}"
+    },
+    {
+      "Name": "demo-WriteAll",
+      "Async": true,
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": -1,
+        "Interval": -1
+      },
+      "Desc": "write string to clipboard",
+      "Func": "{{ WriteAll \"0123456789!!!\uD83D\uDE02❤️\" }}"
+    }
+  ]
+}

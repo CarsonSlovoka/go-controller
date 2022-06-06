@@ -13,6 +13,11 @@ func AllFuncs() map[string]any {
 
 		// Key
 		"TypeStr": TypeStr,
+		"KeyTap":  KeyTap,
+
+		// Clipboard
+		"PasteStr": PasteStr,
+		"WriteAll": WriteAll,
 
 		// Hook
 		"EventHook":  EventHook,
