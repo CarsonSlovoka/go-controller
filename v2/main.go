@@ -16,7 +16,8 @@ func main() {
 	}
 
 	chHookDone := make(chan error) // 等待hook初始化完畢
-	go app.Script.Start(chHookDone)
+	s := app.Script
+	go s.Start(chHookDone)
 	<-chHookDone
 	hookEventDevice := robotgo.EventStart()
 
@@ -35,9 +36,17 @@ func main() {
 				} else {
 					suspendDeviceInfo <- true
 				}
+			case "quit":
+				s.Stop(false)
+				return
+			case "quit -f":
+				s.Stop(true)
+				return
 			case "help":
 				_, _ = dll.User32dll.MessageBox(0, "💡Help", `command list:
 info
+quit
+quit -f
 help
 `,
 					w32.MB_YESNO|w32.MB_TOPMOST|w32.MB_ICONINFORMATION)

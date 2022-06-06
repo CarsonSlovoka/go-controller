@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CarsonSlovoka/go-controller/v2/pkg/script/template/funcs"
+	"github.com/go-vgo/robotgo"
 	"io/ioutil"
 	"log"
 	"os"
@@ -113,12 +114,12 @@ func (job *Job) Wait() {
 	job.status = StatusPaused
 	log.Printf("%q [%v] waiting...\n", job.Name, job.chStatus)
 	s, isOpen := <-job.chStatus // 等待通知
-	log.Printf("[%q] received the status code: %d\n", job.Name, s)
 	if !isOpen {
 		job.status = StatusStopped
-		return
+	} else {
+		job.status = s
 	}
-	job.status = s // 將status更新完通知的狀態
+	log.Printf("[%q] received the status code: %d\n", job.Name, job.status)
 }
 
 func (job *Job) Run() {
@@ -199,4 +200,13 @@ func (job *Job) Execute(context any) {
 	}
 	job.Stop()
 	return
+}
+
+func (s *Script) Stop(force bool) {
+	if !force {
+		for _, job := range s.Template.Jobs {
+			job.Stop()
+		}
+	}
+	robotgo.EventEnd()
 }
