@@ -9,6 +9,9 @@
     {
       "Name": "ExitApp",
       "Func": "{{  (ExitApp .) | EventHook \"KeyDown\" \"ctrl\" \"shift\" \"e\" }}"
+    },
+    {
+      "Func": "{{EventHook \"KeyDown\" \"ctrl\" \"h\" (RunJob \"HelloWorld\" .) }}"
     }
   ],
   "Jobs": [
@@ -18,8 +21,20 @@
       "Func": "{{Move 300 500 | Log | Log \"初始化滑鼠位置終了\" }}"
     },
     {
+      "Name": "HelloWorld",
+      "Desc": "這個job是模擬，如果您想要設定某一個熱鍵來觸發簡單(沒有cmd)工作時，可以造以下這樣設定",
+      "Async": true,
+      "Func": "{{TypeStr \"Hello World\"}}",
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": -1,
+        "Interval": -1
+      }
+    },
+    {
       "Name": "滑鼠來回並點擊",
       "WaitSignalToStart": true,
+      "Async": true,
       "Loop": {
         "MaxRun": 2,
         "MaxRunNote": "-1 means forever. Otherwise, it will be terminated when it reaches that number",

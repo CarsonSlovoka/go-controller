@@ -7,5 +7,8 @@ import (
 
 func TypeStr(str string, args ...float64) string {
 	robotgo.TypeStr(str, args...)
-	return fmt.Sprintf("TypeStr %s %v", str, args)
+	if len(args) > 0 {
+		return fmt.Sprintf("TypeStr %s %v\n", str, args)
+	}
+	return fmt.Sprintf("TypeStr %s", str)
 }

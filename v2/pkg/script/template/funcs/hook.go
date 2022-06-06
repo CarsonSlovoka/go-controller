@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
+	"log"
 	"reflect"
+	"strings"
 )
 
 type Job interface {
@@ -53,6 +55,7 @@ func EventHook(values ...any) string {
 		}
 	}
 
+	log.Printf("register the hook event %q %s\n", inputWhen, strings.Join(keysPressed, " "))
 	robotgo.EventHook(when, keysPressed, func(e hook.Event) { // register hook event // 如果您用多個routine來註冊，要確保一個接一個，不能註冊中途有人插隊，不然會發生map conflict
 		callback()
 	})
@@ -87,7 +90,7 @@ func RunJobByID(jobID uint, jobs []Job) func() {
 func RunJob(name string, jobs []Job) func() {
 	return func() {
 		job := filterJob(jobs, name)
-		fmt.Printf("%+v", job)
+		// fmt.Printf("%+v\n", *job)
 		if job == nil {
 			panic(fmt.Sprintf("job name:%q not found", name))
 		}
@@ -103,6 +106,7 @@ func ExitApp(jobs []Job) func() { // 通知所有工作都結束作業就能終�
 			}
 			job.Stop()
 		}
+		log.Println("Exit App.")
 		robotgo.EventEnd()
 	}
 }

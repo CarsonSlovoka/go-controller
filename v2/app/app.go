@@ -2,6 +2,7 @@ package app
 
 import (
 	"flag"
+	"fmt"
 	"github.com/CarsonSlovoka/go-controller/v2/app/script"
 )
 
@@ -18,7 +19,7 @@ func InitApp() (err error) {
 	var t *script.Template
 	t, err = script.NewTemplate(*inputFilepath)
 	if err != nil {
-		panic("script.NetTemplate error")
+		panic(fmt.Errorf("script.NetTemplate error %w", err))
 	}
 	Script = script.NewScript(t)
 	return err

@@ -53,8 +53,8 @@ type Cmd struct {
 }
 
 type loop struct {
-	MaxRun   int
-	Interval time.Duration // 隔多久時間(毫秒)執行該命令一次
+	MaxRun   int           // -1表示永久運行, 否則運行達到該次數就終止工作
+	Interval time.Duration // 隔多久時間(毫秒)執行該命令一次 // 如果此項數值為-1，表示執行完之後就會等待通知才會再執行一次
 }
 
 // ----

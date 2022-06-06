@@ -48,6 +48,7 @@ func (s *Script) Start(out chan<- error) {
 				mux.Lock()
 				defer mux.Unlock()
 				h.Execute(contextJobs)
+				log.Printf("init hook %q done\n", h.Name)
 			}(hook)
 		}
 		out <- nil // 通知外層所有hook已經初始化完畢
@@ -61,19 +62,21 @@ func (s *Script) Start(out chan<- error) {
 			s.notify[i] = make(chan status)
 			job.status = StatusPaused // 開始都是等待的狀態
 			job.chStatus = s.notify[i]
-			if job.Async { // 若為異步作業，就會等待此工作結束才會執行下一個工作
+			if !job.Async { // 若不為異步作業，就會等待此工作結束才會執行下一個工作
 				wg.Add(1)
 			}
-			go func() {
-				job.Execute(contextJobs)
-				if job.Async {
+			go func(j *Job) {
+				// job.Execute(nil) // ❗ 注意在for中做併發時，如果直接用for的變數會有風險，當變數改變時，routine內使用到的也會跟著變，這可能不是您所期望的，因此最好把它當作參數傳進來
+				j.Execute(nil) // Cmd的工作暫時不傳入任何的context
+				if !job.Async {
 					wg.Done()
 				}
-			}()
+				log.Printf("job.Execute done. [%q]\n", job.Name)
+			}(job)
 			if !job.WaitSignalToStart {
 				job.chStatus <- StatusRunning
 			}
-			if job.Async {
+			if !job.Async {
 				wg.Wait()
 			}
 		}
@@ -107,18 +110,10 @@ func (job *Job) CheckID(id uint) error {
 }
 
 func (job *Job) Wait() {
-	/*
-		if job.status == StatusStopped { // 由於job有可能由其他routine重複執行，所以要確認
-			log.Printf("%q Already closed", job.Name)
-			return
-		}
-		if job.status == StatusPaused {
-			log.Printf("%q Already waiting", job.Name)
-			return
-		}
-	*/
 	job.status = StatusPaused
+	log.Printf("%q [%v] waiting...\n", job.Name, job.chStatus)
 	s, isOpen := <-job.chStatus // 等待通知
+	log.Printf("[%q] received the status code: %d\n", job.Name, s)
 	if !isOpen {
 		job.status = StatusStopped
 		return
@@ -127,25 +122,19 @@ func (job *Job) Wait() {
 }
 
 func (job *Job) Run() {
-	/*
-		if job.status == StatusStopped {
-			log.Printf("%q You can't run again when the job has been closed.", job.Name)
-			return
-		}
-		if job.status == StatusRunning {
-			log.Printf("%q Already running", job.Name)
-			return
-		}
-	*/
+	if job.status == StatusStopped {
+		log.Printf("%s Already closed\n", job.Name)
+		return
+	}
 	job.chStatus <- StatusRunning
 }
 
 func (job *Job) Stop() {
 	if job.status == StatusStopped {
-		log.Printf("%s Already closed", job.Name)
+		log.Printf("%s Already closed\n", job.Name)
 		return
 	}
-
+	log.Printf("%s Stop\n", job.Name)
 	job.status = StatusStopped
 	close(job.chStatus)
 }
@@ -156,13 +145,6 @@ func (job *Job) IsClosed() bool {
 	}
 	return false
 }
-
-/*
-func (job *Job) Response(s status) {
-	job.status = s
-	job.chStatus <- s
-}
-*/
 
 func (job *Job) Execute(context any) {
 	for {
@@ -175,48 +157,46 @@ func (job *Job) Execute(context any) {
 		}
 	}
 
-	if text := job.Func; text != "" { // 對於有指定Func的Job，視為簡單的工作，直接運行後就終了
-		job.execute(text, context)
-		job.Stop()
-		return
-	}
-
-	if len(job.Cmd) == 0 {
-		log.Println("This job neither contains 'Func' nor 'Cmd'(or empty), so it is an empty job.")
-		job.Stop()
-		return
-	}
-
-	ExecuteCMD := func(ctx any) status {
+	ExecuteFunc := func(ctx any) status {
 		if job.status == StatusPaused {
 			job.Wait()
 		}
 		if job.status == StatusStopped {
 			return StatusStopped
 		}
-		for _, curCmd := range job.Cmd {
-			job.execute(curCmd.Func, ctx)
+
+		if text := job.Func; text != "" { // 對於有指定Func的Job，視為簡單的工作，直接運行，忽略所有Cmd的項目
+			job.execute(text, ctx)
+		} else if len(job.Cmd) > 0 {
+			for _, curCmd := range job.Cmd {
+				job.execute(curCmd.Func, ctx)
+			}
+		} else {
+			log.Println("This job neither contains 'Func' nor 'Cmd'(or empty), so it is an empty job.")
+			return StatusStopped
 		}
-		time.Sleep(job.Loop.Interval)
-		return StatusRunning
+
+		if job.Loop.Interval == -1 { // 等待通知才會再執行一次
+			job.Wait()
+			return job.status // 返回通知後的狀態
+		} else if job.Loop.MaxRun == 0 || job.Loop.MaxRun == 1 { // 如果是只有執行一次或者預設值(0)，就直接終止
+			return StatusStopped
+		} else {
+			time.Sleep(job.Loop.Interval * time.Millisecond)
+			return StatusRunning
+		}
 	}
 
 	maxRun := job.Loop.MaxRun
-	if maxRun == RunForever {
-		for {
-			s := ExecuteCMD(nil)
-			if s == StatusStopped {
-				job.Stop()
-				return
-			}
+	count := 0
+	for {
+		count++
+		s := ExecuteFunc(context)
+		if s == StatusStopped ||
+			(count >= maxRun && maxRun != RunForever) {
+			break
 		}
 	}
-	for count := 0; count < maxRun; count++ {
-		s := ExecuteCMD(nil)
-		if s == StatusStopped {
-			job.Stop()
-			return
-		}
-	}
+	job.Stop()
 	return
 }
