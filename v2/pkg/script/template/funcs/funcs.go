@@ -18,6 +18,7 @@ func AllFuncs() map[string]any {
 		"EventHook":  EventHook,
 		"RunJob":     RunJob,
 		"RunJobByID": RunJobByID,
+		"PauseJob":   PauseJob,
 		"ExitApp":    ExitApp,
 
 		// Mouse

@@ -7,6 +7,10 @@
       "Func": "{{ (RunJob \"滑鼠來回並點擊\" .) | EventHook \"KeyDown\" \"s\" }}"
     },
     {
+      "Name": "Pause",
+      "Func": "{{ (PauseJob \"滑鼠來回並點擊\" .) | EventHook \"KeyDown\" \"CTRL\" \"p\" }}"
+    },
+    {
       "Name": "ExitApp",
       "Func": "{{  (ExitApp .) | EventHook \"KeyDown\" \"ctrl\" \"shift\" \"e\" }}"
     },
@@ -36,7 +40,7 @@
       "WaitSignalToStart": true,
       "Async": true,
       "Loop": {
-        "MaxRun": 2,
+        "MaxRun": 4,
         "MaxRunNote": "-1 means forever. Otherwise, it will be terminated when it reaches that number",
         "Interval": 1000,
         "IntervalNote": "milli second"

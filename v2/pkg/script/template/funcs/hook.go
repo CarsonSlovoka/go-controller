@@ -13,6 +13,7 @@ type Job interface {
 	CheckName(name string) error
 	CheckID(id uint) error
 	Run()
+	Pause()
 	Wait()
 	Stop()
 	IsClosed() bool
@@ -77,6 +78,14 @@ func filterJob[T uint | string](jobs []Job, key T) *Job {
 	return nil
 }
 
+func mustFilterJob[T uint | string](jobs []Job, key T) *Job {
+	job := filterJob(jobs, key)
+	if job == nil {
+		panic(fmt.Sprintf("job not found error. job key=%v", key))
+	}
+	return job
+}
+
 func RunJobByID(jobID uint, jobs []Job) func() {
 	return func() {
 		job := filterJob(jobs, jobID)
@@ -95,6 +104,13 @@ func RunJob(name string, jobs []Job) func() {
 			panic(fmt.Sprintf("job name:%q not found", name))
 		}
 		(*job).Run()
+	}
+}
+
+func PauseJob(name string, jobs []Job) func() {
+	return func() {
+		job := mustFilterJob(jobs, name)
+		(*job).Pause()
 	}
 }
 

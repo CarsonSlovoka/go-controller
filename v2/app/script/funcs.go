@@ -130,6 +130,14 @@ func (job *Job) Run() {
 	job.chStatus <- StatusRunning
 }
 
+func (job *Job) Pause() {
+	if job.status == StatusRunning {
+		job.status = StatusPaused
+		log.Printf("pause job: %q\n", job.Name)
+		return
+	}
+}
+
 func (job *Job) Stop() {
 	if job.status == StatusStopped {
 		log.Printf("%s Already closed\n", job.Name)
@@ -159,17 +167,28 @@ func (job *Job) Execute(context any) {
 	}
 
 	ExecuteFunc := func(ctx any) status {
-		if job.status == StatusPaused {
-			job.Wait()
-		}
-		if job.status == StatusStopped {
-			return StatusStopped
-		}
-
 		if text := job.Func; text != "" { // 對於有指定Func的Job，視為簡單的工作，直接運行，忽略所有Cmd的項目
 			job.execute(text, ctx)
 		} else if len(job.Cmd) > 0 {
-			for _, curCmd := range job.Cmd {
+			for idx, curCmd := range job.Cmd {
+				if job.status == StatusPaused { // 如果cmd太多，可以有辦法中途暫停
+					if nextIdx := idx + 1; nextIdx < len(job.Cmd) {
+						nextCmd := job.Cmd[nextIdx]
+						var nextCmdDesc string
+						if desc := nextCmd.Name; desc != "" {
+							nextCmdDesc = desc
+						} else if desc = nextCmd.Desc; desc != "" {
+							nextCmdDesc = desc
+						} else {
+							nextCmdDesc = nextCmd.Func
+						}
+						log.Printf("The %q has paused. The next command is %q", job.Name, nextCmdDesc)
+					}
+					job.Wait()
+				}
+				if job.status == StatusStopped {
+					return StatusStopped
+				}
 				job.execute(curCmd.Func, ctx)
 			}
 		} else {
@@ -197,6 +216,7 @@ func (job *Job) Execute(context any) {
 			(count >= maxRun && maxRun != RunForever) {
 			break
 		}
+		log.Printf("Has run the job %q %d times.", job.Name, count)
 	}
 	job.Stop()
 	return
