@@ -12,6 +12,20 @@ import (
 	"time"
 )
 
+func (s *status) String() string {
+	switch *s {
+	case StatusRunning:
+		return "Running"
+	case StatusPaused:
+		return "Paused"
+	case StatusStopped:
+		return "Stopped"
+	}
+	return ""
+}
+
+// ----
+
 func NewTemplate(filePath string) (*Template, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -114,12 +128,15 @@ func (job *Job) Wait() {
 	job.status = StatusPaused
 	log.Printf("%q [%v] waiting...\n", job.Name, job.chStatus)
 	s, isOpen := <-job.chStatus // 等待通知
+	oldStatus := job.status
 	if !isOpen {
 		job.status = StatusStopped
 	} else {
 		job.status = s
 	}
-	log.Printf("[%q] received the status code: %d\n", job.Name, job.status)
+	if oldStatus != job.status {
+		log.Printf("[%q] The status has changed from %q to %q.\n", job.Name, oldStatus.String(), job.status.String())
+	}
 }
 
 func (job *Job) Run() {
