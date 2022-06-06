@@ -82,7 +82,14 @@
         "Interval": -1
       },
       "Desc": "write string to clipboard",
-      "Func": "{{ WriteAll \"0123456789!!!\uD83D\uDE02❤️\" }}"
+      "Cmd": [
+        {
+          "Func": "{{ WriteAll \"0123456789!!!\uD83D\uDE02❤️\" }}"
+        },
+        {
+          "Func": "{{ MessageBoxOK \"See result\" \"The clipboard has been updated. You can paste it to see the result.\" }}"
+        }
+      ]
     }
   ]
 }

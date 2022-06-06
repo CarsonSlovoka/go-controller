@@ -19,6 +19,9 @@ func AllFuncs() map[string]any {
 		"PasteStr": PasteStr,
 		"WriteAll": WriteAll,
 
+		// Notify
+		"MessageBoxOK": MessageBoxOK,
+
 		// Hook
 		"EventHook":  EventHook,
 		"RunJob":     RunJob,

@@ -3,7 +3,7 @@ module github.com/CarsonSlovoka/go-controller/v2
 go 1.18
 
 require (
-	github.com/CarsonSlovoka/go-pkg/v2 v2.0.3-0.20220523071937-aa1e40252b57
+	github.com/CarsonSlovoka/go-pkg/v2 v2.0.3-0.20220606101647-480bb67d1089
 	github.com/go-vgo/robotgo v0.100.10
 	github.com/robotn/gohook v0.31.3
 )
