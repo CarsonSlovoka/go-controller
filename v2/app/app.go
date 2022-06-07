@@ -6,6 +6,8 @@ import (
 	"github.com/CarsonSlovoka/go-controller/v2/app/script"
 )
 
+const Version = "0.0.0"
+
 var (
 	Script *script.Script
 )
