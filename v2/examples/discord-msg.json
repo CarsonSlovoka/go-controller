@@ -1,0 +1,67 @@
+{
+  "Title": "在通訊軟體傳送訊息",
+  "Desc": "按下Ctrl+1開始, Ctrl+2暫停腳本, 如果要終止請在終端機中輸入quit或直接關閉窗口也行",
+  "Hooks": [
+    {
+      "Name": "Start",
+      "Desc": "",
+      "Func": "{{ (RunJob \"sendMsg\" .) | EventHook \"KeyDown\" \"ctrl\" \"1\" }}"
+    },
+    {
+      "Name": "Pause",
+      "Desc": "",
+      "Func": "{{ (PauseJob \"sendMsg\" .) | EventHook \"KeyDown\" \"ctrl\"  \"2\" }}"
+    }
+  ],
+  "Jobs": [
+    {
+      "Name": "sendMsg",
+      "Desc": "",
+      "Async": true,
+      "WaitSignalToStart": true,
+      "Loop": {
+        "MaxRun": -1,
+        "Interval_Note": "暫停5秒(5000毫秒)",
+        "Interval": 5000
+      },
+      "Cmd": [
+        {
+          "Desc": "點擊應用程式圖標",
+          "Func": "{{Move 1208 1066 }}"
+        },
+        {
+          "Desc": "等待小視窗彈出",
+          "Func": "{{MsSleep 1600 }}"
+        },
+        {
+          "Title": "選擇圖標中彈出的窗口",
+          "Desc": "注意！不可以直接Move過去，否則窗口可能會消失，所以要緩慢的移動",
+          "Func": "{{MoveSmooth 1093 977 | Click \"left\" \"1\" }}"
+        },
+        {
+          "Desc": "移動到輸入訊息的窗口並點擊",
+          "Func": "{{Move 1966 1001 | Click \"left\" \"1\" }}"
+        },
+        {
+          "Desc": "輸入您的訊息",
+          "Func": "{{TypeStr \"Alive\" 200}}"
+        },
+        {
+          "Desc": "發送",
+          "Func": "{{KeyTap \"enter\"}}"
+        },
+        {
+          "Desc": "此項工作可以不需要，只是讓您看到內容確實有輸出之後才去縮小視窗",
+          "Func": "{{Sleep 2}}"
+        },
+        {
+          "Desc": "點擊縮小按鈕",
+          "Func": "{{Move 3776 15 | Click \"left\" \"1\"}}"
+        },
+        {
+          "Func": "{{Log \"本輪工作已完成!\"}}"
+        }
+      ]
+    }
+  ]
+}

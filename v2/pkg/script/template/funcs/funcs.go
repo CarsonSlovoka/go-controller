@@ -32,6 +32,7 @@ func AllFuncs() map[string]any {
 		// Mouse
 		"Click":              Click,
 		"Move":               Move,
+		"MoveSmooth":         MoveSmooth,
 		"MoveSmoothRelative": MoveSmoothRelative,
 
 		// Utils
