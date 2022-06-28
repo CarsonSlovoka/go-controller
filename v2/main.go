@@ -30,7 +30,7 @@ func main() {
 			scanner.Scan()
 			switch scanner.Text() {
 			case "info":
-				response, _ := dll.User32dll.MessageBox(0, "Device Info", "是否要顯示裝置動作資訊?", w32.MB_YESNO|w32.MB_TOPMOST|w32.MB_ICONQUESTION)
+				response, _ := dll.User32dll.MessageBox(0, "Device Info", "是否要顯示裝置動作資訊?", w32.MB_YESNO|w32.MB_ICONQUESTION|w32.MB_SYSTEMMODAL)
 				if response == w32.IDYES {
 					suspendDeviceInfo <- false
 				} else {
